@@ -33,6 +33,12 @@ public class MovieRepo {
         return movieMap;
     }
 
+    /***
+     * Add a new row in the movie table in the database
+     * @param connection
+     * @param movie
+     * @throws SQLException
+     */
     public void addMovieToDatabase(final Connection connection, final Movie movie) throws SQLException {
         String sqlQuery = " INSERT INTO movie (title, genre_id, country_id, language_id)"
                 + " values (?, ?, ?, ?)";
@@ -46,6 +52,12 @@ public class MovieRepo {
         statement.execute();
     }
 
+    /***
+     * Deletes a row from the movie table using movie_id
+     * @param connection
+     * @param movieId
+     * @throws SQLException
+     */
     public void deleteMovieFromDatabase(final Connection connection, final int movieId) throws SQLException {
         String sqlQuery = "DELETE FROM movie WHERE movie_id = ?";
 
@@ -53,6 +65,31 @@ public class MovieRepo {
         statement.setInt(1, movieId);
 
         statement.execute();
+    }
+
+    /***
+     * Update a row in the movie table in the database
+     * @param connection
+     * @param movie
+     * @throws SQLException
+     */
+    public void updateMovieInDatabase(final Connection connection, final Movie movie) throws SQLException {
+        final int movieId = movie.getMovieId();
+        final String title = movie.getName();
+        final int genreId = movie.getGenreId();
+        final int languageId = movie.getLanguageId();
+        final int countryId = movie.getCountryId();
+
+        String sqlQuery = "UPDATE movie SET title=?, genre_id=?, language_id=?, country_id=?, updated=? WHERE movie_id=?";
+        PreparedStatement statement = connection.prepareStatement(sqlQuery);
+        statement.setString(1, title);
+        statement.setInt(2, genreId);
+        statement.setInt(3, languageId);
+        statement.setInt(4, countryId);
+        statement.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
+        statement.setInt(6, movieId);
+
+        statement.executeUpdate();
     }
 
 }

@@ -49,9 +49,7 @@ public class Application {
             countryMap = countryRepo.loadAllCountriesFromDatabase(connection);
             languageMap = languageRepo.loadAllLanguagesFromDatabase(connection);
 
-            while (true) {
-                displayHome(connection);
-            }
+            displayHome(connection);
 
         } catch (SQLException e) {
             System.out.println("Error while executing SQL statement.\n" + e);
@@ -66,38 +64,50 @@ public class Application {
 
 
     private static void displayHome(final Connection connection) throws SQLException, IOException {
-        System.out.println("\nSelect an option:" +
-                "\n1. Add new Movie" +
-                "\n2. View Movies" +
-                "\n3. Delete movie" +
-                "\n4. Exit Application");
-        System.out.println("\n\nPlease enter your input: \t");
 
-        int choice = readNumber(1, 4);
+        while (true) {
+            System.out.println("\nSelect an option:" +
+                    "\n1. Add new Movie" +
+                    "\n2. View Movies" +
+                    "\n3. Delete Movie" +
+                    "\n4. Update Movie" +
+                    "\n5. Exit Application");
+            System.out.println("\n\nPlease enter your input: \t");
 
-        switch (choice) {
-            // Adding a new Movie
-            case 1:
-                addNewMovie(connection);
-                System.out.println("Movie added successfully.");
-                break;
+            int choice = readNumber(1, 4);
 
-            // View all movies
-            case 2:
-                viewAllMovies();
-                break;
+            switch (choice) {
+                // Adding a new Movie
+                case 1:
+                    addNewMovie(connection);
+                    System.out.println("Movie added successfully.");
+                    break;
 
-            case 3:
-                deleteMovie(connection);
-                System.out.println("Movie deleted successfully.");
-                break;
+                // View all movies
+                case 2:
+                    viewAllMovies();
+                    break;
 
-            // Exit the application
-            default:
-                System.out.println("Exiting...");
-                System.exit(0);
-                break;
+                // Delete a movie
+                case 3:
+                    deleteMovie(connection);
+                    System.out.println("Movie deleted successfully.");
+                    break;
 
+                // Update a movie
+                case 4:
+                    updateMovie(connection);
+                    System.out.println("Movie Updated Successfully");
+                    break;
+
+                // Exit the application
+                default:
+                    connection.close();
+                    System.out.println("Exiting...");
+                    System.exit(0);
+                    break;
+
+            }
         }
     }
 
@@ -193,6 +203,57 @@ public class Application {
             System.out.println("--------------------------");
 
         }
+    }
+
+    private static void updateMovie(final Connection connection) throws IOException, SQLException {
+        viewAllMovies();
+
+        System.out.println("Enter the Movie Id you want to update:");
+        int movieId = Integer.parseInt(reader.readLine());
+        while (!movieMap.containsKey(movieId)) {
+            System.out.println("Please enter a valid input: \t");
+            movieId = Integer.parseInt(reader.readLine());
+        }
+
+        Movie movie = movieMap.get(movieId);
+
+        System.out.println("What do you want to update?");
+        System.out.println("1. Update Movie Name" +
+                "\n2. Update Genre");
+
+        System.out.println("Enter your input: \t");
+        int choice = readNumber(1, 3);
+
+        switch (choice) {
+            // Update movie name
+            case 1:
+                System.out.println("Update the movie name to: \t");
+                String movieName = reader.readLine();
+                movie.setName(movieName);
+                movieRepo.updateMovieInDatabase(connection, movie);
+                break;
+
+            // Update genre
+            case 2:
+                System.out.println("Genre: \n");
+                for (Map.Entry<Integer, Genre> entrySet : genreMap.entrySet()) {
+                    System.out.println(entrySet.getKey() + " - " + entrySet.getValue().getGenreName());
+                }
+
+                System.out.println("Enter the genre_id you want the movie to be updated to: \t");
+                int genreId = Integer.parseInt(reader.readLine());
+                while (!genreMap.containsKey(genreId)) {
+                    System.out.println("Please enter a valid input: \t");
+                    genreId = Integer.parseInt(reader.readLine());
+                }
+                movie.setGenreId(genreId);
+                movieRepo.updateMovieInDatabase(connection, movie);
+                break;
+        }
+
+        // Update map with the updated movie object
+        movieMap.put(movieId, movie);
+
     }
 
     private static int readNumber(int min, int max) {
